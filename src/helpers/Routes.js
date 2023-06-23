@@ -76,14 +76,6 @@ export function convertRoutes(navigator) {
             
         },
         {
-            label: 'Recordatorios',
-            roles: [UserRoles.PACIENTE],
-            command: (event) => {
-                navigator('/landing/recordatorios');
-            },
-            path: '/landing/recordatorios',
-        },
-        {
             label: 'Exámenes',
             roles: [UserRoles.ADMINISTRADOR],
             command: (event) => {
