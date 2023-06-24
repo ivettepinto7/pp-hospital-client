@@ -14,13 +14,9 @@ git clone https://github.com/ivettepinto7/pp-hospital-client
 npm install
 ```
 
-3. En el directorio base, crear el archivo .env con el siguiente contenido
-
-```
-REACT_APP_API_URL=
-```
-
-4. Ejecutar
+3. Clonar el archivo __.env.example__ y renombrar la copia a __.env__
+4. Actualizar el valor de las variables del archivo __.env__
+5. Ejecutar
 
 ```
 npm start
