@@ -9,12 +9,18 @@ import { UserContext } from "../contexts/UserContext/UserContext";
 
 //Components imports
 import { InputTextarea } from "primereact/inputtextarea";
-import { Button } from "primereact/button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCapsules,
+  faPenToSquare,
+  faPlusCircle,
+  faTrashAlt,
+} from "@fortawesome/free-solid-svg-icons";
 
 import "../components/cssFiles/FormDemo.css";
-import { PatientInConsult } from "../helpers/PatientInConsult";
 import UserRecordTable from "../components/EmergentWindows/UserRecordTable";
-import CreatePrescription from "../components/EmergentWindows/CreatePrescription";
+import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
 
 const DrugsSchema = Yup.object().shape({
   list: Yup.array()
@@ -42,26 +48,31 @@ export default function MedicalConsultation() {
   const [drugsList, setDrugsList] = useState([]);
   const [userRecordsList, setUserRecordsList] = useState([]);
   const [showMessage, setShowMessage] = useState(false);
+  useEffect(() => {
+    //obtener lista
+    try {
+      axios
+        .get(process.env.REACT_APP_API_URL + "doctor/drugs", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            return setDrugsList(res.data);
+          }
+        })
+        .catch((err) => console.error(err));
+    } catch (error) {
+      throw console.error(error);
+    }
+  }, [role, token]);
+  const CustomInput = (props) => <input type="number" {...props} />;
+
   const getUserRecords = (id) => {
-    useEffect(() => {
-      //obtener lista
-      try {
-        axios.get(process.env.REACT_APP_API_URL + "doctor/drugs", { headers: { Authorization: `Bearer ${token}` } })
-          .then((res) => {
-            if (res.status === 200) {
-              return setDrugsList(res.data);
-            }
-          })
-          .catch(err => console.error(err));
-      } catch (error) {
-        throw console.error(error)
-      }
-    }, [role,token]);
     try {
       axios
         .get(
           process.env.REACT_APP_API_URL +
-            `doctor/citas-dia/consulta/expediente/${userCode}`,
+            `doctor/citas-dia/consulta/expediente/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         )
         .then((res) => {
@@ -74,6 +85,21 @@ export default function MedicalConsultation() {
     } catch (error) {
       throw console.error(error);
     }
+  };
+  const dialogFooter = () => {
+    return (
+      <div className="flex justify-content-center">
+        <Button
+          label="OK"
+          className="p-button-text"
+          autoFocus
+          onClick={() => {
+            setShowMessage(false);
+            navigate("/landing/citas-dia");
+          }}
+        />
+      </div>
+    );
   };
 
   return (
