@@ -1,5 +1,8 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
+//form validations
+import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
+import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import MenuContext from "../contexts/MenuContext/MenuContext";
 import { UserContext } from "../contexts/UserContext/UserContext";
@@ -13,7 +16,21 @@ import { PatientInConsult } from "../helpers/PatientInConsult";
 import UserRecordTable from "../components/EmergentWindows/UserRecordTable";
 import CreatePrescription from "../components/EmergentWindows/CreatePrescription";
 
-
+const DrugsSchema = Yup.object().shape({
+  list: Yup.array()
+    .of(
+      Yup.object().shape({
+        medicine: Yup.number()
+          .min(0, 'Requerido')
+          .required('Requerido'),
+        doses: Yup.number().min(1, 'La dosis minima es 1')
+          .required('Requerido'),
+        quantity: Yup.number()
+          .min(1, 'La cantidad minima es 1')
+          .required('Requerido')
+      })
+    ).max(9, 'Solo puede agregar 9 medicamentos. ')
+});
 
 export default function MedicalConsultation() {
   const { token, fullname, age, gender, idAppointment, userCode } = useContext(UserContext);
