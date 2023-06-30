@@ -29,7 +29,7 @@ export default function UsersTable() {
 
   useEffect(() => {
     menuContext.getAllUsers(token);
-  }, [menuContext, token]);
+  }, []);
 
   const getCurrentUserInfo = (id) => {
     try {

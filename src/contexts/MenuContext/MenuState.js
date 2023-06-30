@@ -59,10 +59,6 @@ const MenuState = (props) => {
   const [emergentDeleteOneDrugState, setemergentDeleteOneDrugState] =
     useState(false);
 
-  //State for all users
-  const [usersList, setUsersList] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   //Function for emergent create drug state
   function settingEmergentNewDrugState() {
     if (emergentNewDrugState) setemergentNewDrugaState(false);
@@ -177,6 +173,10 @@ const MenuState = (props) => {
     else setPrescriptionState(true);
   }
 
+  //State for all users
+  const [usersList, setUsersList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   //Function to egt all users
   function getAllUsers(token) {
     try {
@@ -196,53 +196,76 @@ const MenuState = (props) => {
     }
   }
 
-  return (
-    <MenuContext.Provider
-      value={{
-        emergentNewUserState,
-        emergentEditUserState,
-        emergentEditOwnUserState,
-        emergentDeleteOneUserState,
-        emergentNewExamState,
-        emergentEditExamState,
-        emergentDeleteOneExamState,
-        emergentNewVaccineState,
-        emergentEditVaccineState,
-        emergentDeleteOneVaccineState,
-        emergentNewAreaState,
-        emergentEditAreaState,
-        emergentDeleteOneAreaState,
-        emergentShowRecordState,
-        emergentPrescriptionState,
-        emergentNewDrugState,
-        emergentEditDrugState,
-        emergentDeleteOneDrugState,
-        usersList,
-        loading,
+  //State for all exams
+  const [testsList, setTestsList] = useState([]);
 
-        settingEmergentNewUserState,
-        settingEmergentEditUserState,
-        settingEmergentEditOwnUserState,
-        settingEmergentDeleteOneUserState,
-        settingEmergentNewExamState,
-        settingEmergentEditExamState,
-        settingEmergentDeleteOneExamState,
-        settingEmergentNewVaccineState,
-        settingEmergentEditVaccineState,
-        settingEmergentDeleteOneVaccineState,
-        settingEmergentNewAreaState,
-        settingEmergentEditAreaState,
-        settingEmergentDeleteOneAreaState,
-        settingEmergentShowRecordState,
-        settingEmergentPrescriptionState,
-        settingEmergentNewDrugState,
-        settingEmergentEditDrugState,
-        settingEmergentDeleteOneDrugState,
-        getAllUsers,
-      }}
-    >
-      {props.children}
-    </MenuContext.Provider>
+  function getAllTests(token) {
+    try {
+      axios
+        .get(process.env.REACT_APP_API_URL + "admin/tests", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            setTestsList(res.data);
+            setLoading(false);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } catch (error) {
+      throw console.error(error);
+    }
+  }
+
+  const values = {
+    emergentNewUserState,
+    emergentEditUserState,
+    emergentEditOwnUserState,
+    emergentDeleteOneUserState,
+    emergentNewExamState,
+    emergentEditExamState,
+    emergentDeleteOneExamState,
+    emergentNewVaccineState,
+    emergentEditVaccineState,
+    emergentDeleteOneVaccineState,
+    emergentNewAreaState,
+    emergentEditAreaState,
+    emergentDeleteOneAreaState,
+    emergentShowRecordState,
+    emergentPrescriptionState,
+    emergentNewDrugState,
+    emergentEditDrugState,
+    emergentDeleteOneDrugState,
+    usersList,
+    loading,
+    testsList,
+
+    settingEmergentNewUserState,
+    settingEmergentEditUserState,
+    settingEmergentEditOwnUserState,
+    settingEmergentDeleteOneUserState,
+    settingEmergentNewExamState,
+    settingEmergentEditExamState,
+    settingEmergentDeleteOneExamState,
+    settingEmergentNewVaccineState,
+    settingEmergentEditVaccineState,
+    settingEmergentDeleteOneVaccineState,
+    settingEmergentNewAreaState,
+    settingEmergentEditAreaState,
+    settingEmergentDeleteOneAreaState,
+    settingEmergentShowRecordState,
+    settingEmergentPrescriptionState,
+    settingEmergentNewDrugState,
+    settingEmergentEditDrugState,
+    settingEmergentDeleteOneDrugState,
+    getAllUsers,
+    getAllTests,
+  };
+
+  return (
+    <MenuContext.Provider value={values}>{props.children}</MenuContext.Provider>
   );
 };
 
