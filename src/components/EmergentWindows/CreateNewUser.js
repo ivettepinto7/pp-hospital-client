@@ -20,7 +20,7 @@ import { Roles } from "../../helpers/Roles";
 import axios from "axios";
 
 export default function CreateNewUser() {
-  const { emergentNewUserState } = useContext(MenuContext);
+  const { emergentNewUserState, getAllUsers } = useContext(MenuContext);
   const menuContext = useContext(MenuContext);
   const { token } = useContext(UserContext);
 
@@ -28,7 +28,7 @@ export default function CreateNewUser() {
   const roles = Roles;
   const toast = useRef(null);
 
-  var today = new Date();
+  let today = new Date();
   const [display, setDisplay] = useState(false);
   const [areasList, setAreasList] = useState([]);
   const [showMessage, setShowMessage] = useState(false);
@@ -85,13 +85,13 @@ export default function CreateNewUser() {
         style: { marginLeft: "20%" },
       });
     }
-  }, []);
+  }, [token]);
 
   const onSubmit = (data) => {
     setFormData(data);
-    var dd = birthdate.getDate();
-    var mm = birthdate.getMonth() + 1;
-    var yyyy = birthdate.getFullYear();
+    let dd = birthdate.getDate();
+    let mm = birthdate.getMonth() + 1;
+    let yyyy = birthdate.getFullYear();
 
     if (dd < 10) {
       dd = "0" + dd;
@@ -112,6 +112,7 @@ export default function CreateNewUser() {
           if (res.status === 201) {
             setShowMessage(true);
             reset();
+            getAllUsers(token);
           }
         })
         .catch((err) => {
@@ -146,7 +147,11 @@ export default function CreateNewUser() {
         label="OK"
         className="p-button-text"
         autoFocus
-        onClick={() => setShowMessage(false)}
+        onClick={() => {
+          setShowMessage(false);
+          menuContext.settingEmergentNewUserState();
+
+        }}
       />
     </div>
   );

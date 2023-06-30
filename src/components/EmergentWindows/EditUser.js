@@ -45,6 +45,7 @@ export default function EditUser({ i, u, currentInfo }) {
                     if (res.status === 200) {
                         reset();
                         setShowMessage(true);
+                        menuContext.getAllUsers(token);
                     }
                 })
                 .catch((err) => {

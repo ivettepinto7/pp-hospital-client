@@ -55,6 +55,7 @@ export default function DeleteOneUser({ i, u }) {
                             life: 3000,
                             style: { marginLeft: '20%' }
                         });
+                        menuContext.getAllUsers(token);
                     }
                 })
                 .catch(err => {
