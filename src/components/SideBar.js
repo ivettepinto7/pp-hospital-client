@@ -36,7 +36,7 @@ export default function SideBar() {
 
     return (
         <>
-            <EditOwnUser />
+            {menuContext.emergentEditOwnUserState && <EditOwnUser />}
             <div className='w-full p-4 flex items-center justify-between' style={{ backgroundColor: '#1D4078' }}>
                 <button onClick={() => setActive(true)} className=" p-sidebar-icon p-link mr-1">
                     <span style={{ color: 'white', 'fontSize': '2em' }} className="pi pi-bars" />

@@ -41,6 +41,7 @@ export default function EditDrugExistence({ code, active }) {
                     if (res.status === 200) {
                         reset();
                         setShowMessage(true);
+                        menuContext.getAllDrugs(token);
                     }
                 })
                 .catch((err) => {

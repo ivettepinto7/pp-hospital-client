@@ -42,6 +42,7 @@ export default function CreateNewDrug() {
                     if (res.status === 201) {
                         setShowMessage(true);
                         reset();
+                        menuContext.getAllDrugs(token);
                     }
                 })
                 .catch(err => {
@@ -69,7 +70,7 @@ export default function CreateNewDrug() {
     };
 
     const dialogFooter = <div className="flex justify-content-center"><Button label="OK"
-        className="p-button-text" autoFocus onClick={() => setShowMessage(false)} /></div>;
+        className="p-button-text" autoFocus onClick={() => {setShowMessage(false); onHide('display')}} /></div>;
 
     useEffect(() => {
         setDisplay(emergentNewDrugState);

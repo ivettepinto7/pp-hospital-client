@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-import axios from "axios";
 import { UserContext } from "../contexts/UserContext/UserContext";
 import MenuContext from "../contexts/MenuContext/MenuContext";
 
@@ -23,25 +22,9 @@ export default function VaccinesTable() {
   const [namevar, setnamevar] = useState("");
 
   const dt = useRef(null);
-  const [loading, setLoading] = useState(true);
-  const [vaccinesList, setVaccinesList] = useState([]);
 
   useEffect(() => {
-    try {
-      axios
-        .get(process.env.REACT_APP_API_URL + "admin/vaccines", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            setVaccinesList(res.data);
-            setLoading(false);
-          }
-        })
-        .catch((err) => console.error(err));
-    } catch (error) {
-      throw console.error(error);
-    }
+    menuContext.getAllVaccines(token);
   }, []);
 
   const leftToolbarTemplate = () => {
@@ -97,17 +80,21 @@ export default function VaccinesTable() {
       {/*
        *User creation emergent window
        */}
-      <CreateNewVaccine />
+      {menuContext.emergentNewVaccineState && <CreateNewVaccine />}
 
       {/*
        *User edit emergent window
        */}
-      <EditVaccineExistence code={codevar} name={namevar} />
+      {menuContext.emergentEditVaccineState && (
+        <EditVaccineExistence code={codevar} name={namevar} />
+      )}
 
       {/*
        *User deletion emergent window
        */}
-      <DeleteOneVaccine code={codevar} name={namevar} />
+      {menuContext.emergentDeleteOneVaccineState && (
+        <DeleteOneVaccine code={codevar} name={namevar} />
+      )}
 
       <div className="card">
         <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
@@ -116,15 +103,15 @@ export default function VaccinesTable() {
           showGridlines
           lazy={true}
           ref={dt}
-          value={vaccinesList}
+          value={menuContext.vaccinesList}
           dataKey="id"
           paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 25]}
-          totalRecords={vaccinesList.length}
+          totalRecords={menuContext.vaccinesList.length}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} vacunas"
-          loading={loading}
+          loading={menuContext.loading}
           header={header}
           responsiveLayout="scroll"
         >

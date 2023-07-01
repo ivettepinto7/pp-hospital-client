@@ -18,11 +18,9 @@ export default function UsersTable() {
   const menuContext = useContext(MenuContext);
   const { token, id_person } = useContext(UserContext);
 
-  const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [id, setId] = useState(null);
 
-  const [usersList, setUsersList] = useState([]);
   const dt = useRef(null);
   const [currentInfo, setCurrentInfo] = useState({
     email: "",
@@ -30,21 +28,7 @@ export default function UsersTable() {
   });
 
   useEffect(() => {
-    try {
-      axios
-        .get(process.env.REACT_APP_API_URL + "admin/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            setUsersList(res.data);
-            setLoading(false);
-          }
-        })
-        .catch((err) => console.error(err));
-    } catch (error) {
-      throw console.error(error);
-    }
+    menuContext.getAllUsers(token);
   }, []);
 
   const getCurrentUserInfo = (id) => {
@@ -79,7 +63,7 @@ export default function UsersTable() {
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <div className="space-x-2">
+      <div className="space-x-1">
         <Button
           icon="pi pi-pencil"
           tooltip="Editar"
@@ -127,7 +111,7 @@ export default function UsersTable() {
     else return "Masculino";
   };
 
-  const filteredPeople = usersList.filter((user) => {
+  const filteredPeople = menuContext.usersList.filter((user) => {
     return id_person !== user.id_person;
   });
 
@@ -164,11 +148,11 @@ export default function UsersTable() {
           showGridlines
           ref={dt}
           value={filteredPeople}
-          loading={loading}
+          loading={menuContext.loading}
           dataKey="id_person"
           header={header}
           responsiveLayout="scroll"
-          totalRecords={usersList.length}
+          totalRecords={menuContext.usersList.length}
           paginator
           paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
           currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} usuarios"

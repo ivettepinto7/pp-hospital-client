@@ -55,6 +55,7 @@ export default function DeleteExamExistence({ id, name }) {
                             life: 3000,
                             style: { marginLeft: '20%' }
                         });
+                        menuContext.getAllTests(token);
                     }
                 })
                 .catch(err => {

@@ -42,6 +42,7 @@ export default function EditExamExistence({ id, name }) {
                     if (res.status === 200) {
                         reset();
                         setShowMessage(true);
+                        menuContext.getAllTests(token);
                     }
                 })
                 .catch((err) => {

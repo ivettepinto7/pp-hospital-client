@@ -44,6 +44,7 @@ export default function CreateNewExam() {
                     if (res.status === 201) {
                         setShowMessage(true);
                         reset();
+                        menuContext.getAllTests(token);
                     }
                 })
                 .catch(err => {
@@ -70,7 +71,7 @@ export default function CreateNewExam() {
         return errors[name] && <small className="p-error">{errors[name].message}</small>
     };
 
-    const dialogFooter = <div className="flex justify-content-center"><Button label="OK" className="p-button-text" autoFocus onClick={() => setShowMessage(false)} /></div>;
+    const dialogFooter = <div className="flex justify-content-center"><Button label="OK" className="p-button-text" autoFocus onClick={() => {setShowMessage(false); menuContext.settingEmergentNewExamState()}} /></div>;
 
 
     useEffect(() => {
@@ -116,7 +117,7 @@ export default function CreateNewExam() {
             >
 
                 <div className="form-demo w-full">
-                    <Dialog visible={showMessage} onHide={() => setShowMessage(false)} position="top" footer={dialogFooter} showHeader={false} breakpoints={{ '960px': '80vw' }} style={{ width: '30vw' }}>
+                    <Dialog visible={showMessage} onHide={() => {setShowMessage(false)}} position="top" footer={dialogFooter} showHeader={false} breakpoints={{ '960px': '80vw' }} style={{ width: '30vw' }}>
                         <div className="flex justify-content-center flex-column pt-6 px-3">
                             <i className="pi pi-check-circle" style={{ fontSize: '5rem', color: 'var(--green-500)' }}></i>
                             <p style={{ lineHeight: 1.5, textIndent: '1rem' }}>
