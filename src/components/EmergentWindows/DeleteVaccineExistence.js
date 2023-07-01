@@ -55,6 +55,7 @@ export default function DeleteVaccineExistence({code, name}) {
                             life: 3000,
                             style: { marginLeft: '20%' }
                         });
+                        menuContext.getAllVaccines(token);
                     }
                 })
                 .catch(err => {

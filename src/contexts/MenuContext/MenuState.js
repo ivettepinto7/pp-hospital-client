@@ -219,6 +219,26 @@ const MenuState = (props) => {
     }
   }
 
+  const [vaccinesList, setVaccinesList] = useState([]);
+
+  function getAllVaccines(token) {
+    try {
+      axios
+        .get(process.env.REACT_APP_API_URL + "admin/vaccines", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            setVaccinesList(res.data);
+            setLoading(false);
+          }
+        })
+        .catch((err) => console.error(err));
+    } catch (error) {
+      throw console.error(error);
+    }
+  }
+
   const values = {
     emergentNewUserState,
     emergentEditUserState,
@@ -241,6 +261,7 @@ const MenuState = (props) => {
     usersList,
     loading,
     testsList,
+    vaccinesList,
 
     settingEmergentNewUserState,
     settingEmergentEditUserState,
@@ -262,6 +283,7 @@ const MenuState = (props) => {
     settingEmergentDeleteOneDrugState,
     getAllUsers,
     getAllTests,
+    getAllVaccines
   };
 
   return (

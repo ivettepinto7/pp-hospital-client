@@ -41,6 +41,7 @@ export default function CreateNewVaccine() {
                     if (res.status === 201) {
                         setShowMessage(true);
                         reset();
+                        menuContext.getAllVaccines(token);
                     }
                 })
                 .catch(err => {
@@ -67,7 +68,7 @@ export default function CreateNewVaccine() {
         return errors[name] && <small className="p-error">{errors[name].message}</small>
     };
 
-    const dialogFooter = <div className="flex justify-content-center"><Button label="OK" className="p-button-text" autoFocus onClick={() => setShowMessage(false)} /></div>;
+    const dialogFooter = <div className="flex justify-content-center"><Button label="OK" className="p-button-text" autoFocus onClick={() => {setShowMessage(false); menuContext.settingEmergentNewVaccineState();}} /></div>;
 
 
     useEffect(() => {

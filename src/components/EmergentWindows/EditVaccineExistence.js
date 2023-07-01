@@ -39,6 +39,7 @@ export default function EditVaccineExistence({code,name}) {
                     if (res.status === 200) {
                         reset();
                         setShowMessage(true);
+                        menuContext.getAllVaccines(token);
                     }
                 })
                 .catch((err) => {
