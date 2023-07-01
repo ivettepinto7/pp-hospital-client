@@ -80,17 +80,21 @@ export default function VaccinesTable() {
       {/*
        *User creation emergent window
        */}
-      <CreateNewVaccine />
+      {menuContext.emergentNewVaccineState && <CreateNewVaccine />}
 
       {/*
        *User edit emergent window
        */}
-      <EditVaccineExistence code={codevar} name={namevar} />
+      {menuContext.emergentEditVaccineState && (
+        <EditVaccineExistence code={codevar} name={namevar} />
+      )}
 
       {/*
        *User deletion emergent window
        */}
-      <DeleteOneVaccine code={codevar} name={namevar} />
+      {menuContext.emergentDeleteOneVaccineState && (
+        <DeleteOneVaccine code={codevar} name={namevar} />
+      )}
 
       <div className="card">
         <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>

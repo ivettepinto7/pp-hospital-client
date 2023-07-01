@@ -52,6 +52,7 @@ export default function DeleteAreaExistence({code, name}) {
                             life: 3000,
                             style: { marginLeft: '20%' }
                         });
+                        menuContext.getAllAreas(token);
                     }
                 })
                 .catch(err => {

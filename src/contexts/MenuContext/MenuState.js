@@ -239,6 +239,26 @@ const MenuState = (props) => {
     }
   }
 
+  const [areasList, setAreasList] = useState([]);
+
+  function getAllAreas(token) {
+    try {
+      axios
+        .get(process.env.REACT_APP_API_URL + "admin/areas", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            setAreasList(res.data);
+            setLoading(false);
+          }
+        })
+        .catch((err) => console.error(err));
+    } catch (error) {
+      throw console.error(error);
+    }
+  }
+
   const values = {
     emergentNewUserState,
     emergentEditUserState,
@@ -262,6 +282,7 @@ const MenuState = (props) => {
     loading,
     testsList,
     vaccinesList,
+    areasList,
 
     settingEmergentNewUserState,
     settingEmergentEditUserState,
@@ -283,7 +304,8 @@ const MenuState = (props) => {
     settingEmergentDeleteOneDrugState,
     getAllUsers,
     getAllTests,
-    getAllVaccines
+    getAllVaccines,
+    getAllAreas,
   };
 
   return (

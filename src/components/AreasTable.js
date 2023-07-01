@@ -5,10 +5,10 @@ import MenuContext from "../contexts/MenuContext/MenuContext";
 
 //Components imports
 import { DataTable } from "primereact/datatable";
-import { Column } from 'primereact/column';
-import { Toolbar } from 'primereact/toolbar';
+import { Column } from "primereact/column";
+import { Toolbar } from "primereact/toolbar";
 import { Button } from "primereact/button";
-import './cssFiles/DataTable.css';
+import "./cssFiles/DataTable.css";
 
 import CreateNewArea from "./EmergentWindows/CreateNewArea";
 import EditAreaExistence from "./EmergentWindows/EditAreaExistence";
@@ -20,25 +20,13 @@ export default function AreasTable() {
 
   const [codevar, setcodevar] = useState("");
   const [namevar, setnamevar] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [areasList, setAreasList] = useState([]);
 
   const dt = useRef(null);
 
   useEffect(() => {
-    try {
-      axios.get(process.env.REACT_APP_API_URL + "admin/areas", { headers: { Authorization: `Bearer ${token}` } })
-        .then(res => {
-          if (res.status === 200) {
-            setAreasList(res.data);
-            setLoading(false);
-          }
-        }).catch(err => console.error(err));
-    } catch (error) {
-      throw console.error(error);
-    }
-  }, [])
-  
+    menuContext.getAllAreas(token);
+  }, []);
+
   const leftToolbarTemplate = () => {
     return (
       <>
@@ -49,8 +37,8 @@ export default function AreasTable() {
           onClick={() => menuContext.settingEmergentNewAreaState()}
         />
       </>
-    )
-  }
+    );
+  };
 
   const actionBodyTemplate = (rowData) => {
     return (
@@ -75,7 +63,7 @@ export default function AreasTable() {
         />
       </>
     );
-  }
+  };
 
   const header = (
     <div className="table-header">
@@ -83,47 +71,68 @@ export default function AreasTable() {
     </div>
   );
 
-  const genderBodyTemplate = (rowData) => {
-    if(rowData.gender === 'F') return 'Femenino';
-    else if(rowData.gender === 'M') return 'Masculino';
-    else return 'Indiferente';
-  }
+  const shiftBodyTemplate = (rowData) => {
+    return `${rowData.id_shift.start_hour} - ${rowData.id_shift.finish_hour}`;
+  };
 
   return (
     <div className="w-full overflow-hidden">
       {/*
-            *User creation emergent window 
-          */}
-      <CreateNewArea />
+       *User creation emergent window
+       */}
+      {menuContext.emergentNewAreaState && <CreateNewArea />}
 
       {/*
-              *User edit emergent window 
-            */}
-      <EditAreaExistence code={codevar} name={namevar} />
+       *User edit emergent window
+       */}
+      {menuContext.emergentEditAreaState && (
+        <EditAreaExistence code={codevar} name={namevar} />
+      )}
 
       {/*
-              *User deletion emergent window 
-            */}
-      <DeleteOneArea code={codevar} name={namevar} />
+       *User deletion emergent window
+       */}
+      {menuContext.emergentDeleteOneAreaState && (
+        <DeleteOneArea code={codevar} name={namevar} />
+      )}
 
       <div className="card">
+        <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
 
-        <Toolbar className="mb-4" left={leftToolbarTemplate} ></Toolbar>
-
-        <DataTable showGridlines lazy={true} ref={dt} value={areasList}
-          dataKey="id_area" paginator rows={10} rowsPerPageOptions={[5, 10, 25]} totalRecords={areasList.length}
+        <DataTable
+          showGridlines
+          lazy={true}
+          ref={dt}
+          value={menuContext.areasList}
+          dataKey="id_area"
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 25]}
+          totalRecords={menuContext.areasList.length}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} áreas"
-          loading={loading} header={header} responsiveLayout="scroll">
-
-          <Column field="name" header="Nombre" style={{ minWidth: '12rem' }}></Column>
-          <Column field="gender" body={genderBodyTemplate} header="Género" style={{ minWidth: '12rem' }}></Column>
-          <Column field="start_age" header="Edad de inicio" style={{ minWidth: '12rem' }}></Column>
-          <Column field="frequency" header="Frecuencia (días)" style={{ minWidth: '8rem' }}></Column>
-          <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '8rem' }}></Column>
-
+          loading={menuContext.loading}
+          header={header}
+          responsiveLayout="scroll"
+        >
+          <Column
+            field="name"
+            header="Nombre"
+            style={{ minWidth: "12rem" }}
+          ></Column>
+          <Column
+            field="id_shift"
+            body={shiftBodyTemplate}
+            header="Turno"
+            style={{ minWidth: "12rem" }}
+          ></Column>
+          <Column
+            body={actionBodyTemplate}
+            exportable={false}
+            style={{ minWidth: "8rem" }}
+          ></Column>
         </DataTable>
       </div>
     </div>
-  )
+  );
 }
