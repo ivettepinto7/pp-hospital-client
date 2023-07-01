@@ -52,6 +52,7 @@ export default function DeleteDrugExistence({code, name}) {
                             life: 3000,
                             style: { marginLeft: '20%' }
                         });
+                        menuContext.getAllDrugs(token);
                     }
                 })
                 .catch(err => {
