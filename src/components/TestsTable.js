@@ -28,4 +28,27 @@ export default function TestsTable() {
       throw console.error(error);
     }
   })
-  
+
+
+  const header = (
+    <div className="table-header">
+      <h5 className="mx-0 my-1">Examenes realizados</h5>
+    </div>
+  );
+
+  return (
+    <div className="w-full overflow-hidden">
+      <div className="card">
+        <DataTable showGridlines ref={dt} value={doneTestsList}
+          dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} exámenes"
+          loading={loading} header={header} responsiveLayout="scroll">
+          <Column field="id_test.name" header="Nombre del examen" style={{ minWidth: '12rem' }}></Column>
+          <Column field="timestamp" header="Fecha de toma" style={{ minWidth: '12rem' }}></Column>
+        </DataTable>
+      </div>
+    </div>
+  )
+}
+
