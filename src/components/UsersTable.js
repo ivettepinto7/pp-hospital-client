@@ -18,28 +18,27 @@ export default function UsersTable() {
   const menuContext = useContext(MenuContext);
   const { token, id_person } = useContext(UserContext);
 
-  const [username, setUsername] = useState("");
-  const [id, setId] = useState(null);
-
   const dt = useRef(null);
-  const [currentInfo, setCurrentInfo] = useState({
-    email: "",
-    status: null,
-  });
+  const [id, setId] = useState(null);
+  const [username, setUsername] = useState("");
+  const [currentInfo, setCurrentInfo] = useState({});
 
   useEffect(() => {
     menuContext.getAllUsers(token);
   }, []);
 
-  const getCurrentUserInfo = (id) => {
+  const getCurrentUserInfo = (rowData) => {
     try {
       axios
-        .get(process.env.REACT_APP_API_URL + `admin/users/${id}`, {
+        .get(process.env.REACT_APP_API_URL + `admin/users/${rowData.id_person}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
           if (res.status === 200) {
             setCurrentInfo(res.data);
+            setId(rowData.id_person);
+            setUsername(rowData.username);
+            menuContext.settingEmergentEditUserState();
           }
         })
         .catch((err) => console.error(err));
@@ -70,10 +69,7 @@ export default function UsersTable() {
           tooltipOptions={{ position: "bottom" }}
           className="p-button-rounded p-button-success mr-2 p-tooltip-bottom"
           onClick={() => {
-            setId(rowData.id_person);
-            setUsername(rowData.username);
-            getCurrentUserInfo(rowData.id_person);
-            menuContext.settingEmergentEditUserState();
+            getCurrentUserInfo(rowData);
           }}
         />
         <Button
@@ -132,14 +128,16 @@ export default function UsersTable() {
       {/*
        *User edit emergent window
        */}
-      {menuContext.emergentEditUserState && (
-        <EditUser i={id} u={username} currentInfo={currentInfo} />
+      {menuContext.emergentEditUserState && currentInfo && (
+        <EditUser id={id} username={username} currentInfo={currentInfo} />
       )}
 
       {/*
        *User deletion emergent window
        */}
-      {menuContext.emergentDeleteOneUserState && <DeleteOneUser i={id} u={username} />}
+      {menuContext.emergentDeleteOneUserState && (
+        <DeleteOneUser i={id} u={username} />
+      )}
 
       <div className="card">
         <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
@@ -213,7 +211,6 @@ export default function UsersTable() {
             exportable={false}
             style={{ minWidth: "10rem" }}
           ></Column>
-
         </DataTable>
       </div>
     </div>
