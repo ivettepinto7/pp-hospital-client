@@ -19,12 +19,32 @@ export default function DrugsTable() {
   const { token } = useContext(UserContext);
   const [codevar, setcodevar] = useState("");
   const [namevar, setnamevar] = useState("");
+  const [currentInfo, setCurrentInfo] = useState({});
 
   useEffect(() => {
     menuContext.getAllDrugs(token);
   }, []);
 
   const dt = useRef(null);
+
+  const getCurrentInfo = (rowData) => {
+    try {
+      axios
+        .get(process.env.REACT_APP_API_URL + `admin/drugs/${rowData.id_drug}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            setCurrentInfo(res.data);
+            setnamevar(rowData.active);
+            menuContext.settingEmergentEditDrugState();
+          }
+        })
+        .catch((err) => console.error(err));
+    } catch (error) {
+      throw console.error(error);
+    }
+  };
 
   const leftToolbarTemplate = () => {
     return (
@@ -47,8 +67,7 @@ export default function DrugsTable() {
           className="p-button-rounded p-button-success mr-2"
           onClick={() => {
             setcodevar(rowData.id_drug);
-            setnamevar(rowData.active);
-            menuContext.settingEmergentEditDrugState();
+            getCurrentInfo(rowData);
           }}
         />
         <Button
@@ -80,8 +99,12 @@ export default function DrugsTable() {
       {/*
        *User edit emergent window
        */}
-      {menuContext.emergentEditDrugState && (
-        <EditDrugExistence code={codevar} active={namevar} />
+      {menuContext.emergentEditDrugState && currentInfo && (
+        <EditDrugExistence
+          code={codevar}
+          active={namevar}
+          currentInfo={currentInfo}
+        />
       )}
 
       {/*
