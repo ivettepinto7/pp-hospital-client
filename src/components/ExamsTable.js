@@ -13,18 +13,44 @@ import EditExamExistence from "./EmergentWindows/EditExamExistence";
 import DeleteOneExam from "./EmergentWindows/DeleteExamExistence";
 
 import CreateNewExam from "./EmergentWindows/CreateNewExam";
+import axios from "axios";
 
 export default function ExamsTable() {
   const menuContext = useContext(MenuContext);
   const { token } = useContext(UserContext);
   const [codevar, setcodevar] = useState("");
   const [namevar, setnamevar] = useState("");
+  const [currentInfo, setCurrentInfo] = useState({});
 
   const dt = useRef(null);
 
   useEffect(() => {
     menuContext.getAllTests(token);
   }, []);
+
+  const getCurrentInfo = (rowData) => {
+    try {
+      axios
+        .get(
+          process.env.REACT_APP_API_URL + `admin/tests/${rowData.id_test}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            console.log("data actual ", res.data);
+            setCurrentInfo(res.data);
+            setcodevar(rowData.id_test);
+            setnamevar(rowData.name);
+            menuContext.settingEmergentEditExamState();
+          }
+        })
+        .catch((err) => console.error(err));
+    } catch (error) {
+      throw console.error(error);
+    }
+  };
 
   const leftToolbarTemplate = () => {
     return (
@@ -48,9 +74,7 @@ export default function ExamsTable() {
           tooltipOptions={{ position: "bottom" }}
           className="p-button-rounded p-button-success mr-2"
           onClick={() => {
-            setcodevar(rowData.id_test);
-            setnamevar(rowData.name);
-            menuContext.settingEmergentEditExamState();
+            getCurrentInfo(rowData);
           }}
         />
         <Button
@@ -75,8 +99,8 @@ export default function ExamsTable() {
   );
 
   const genderBodyTemplate = (rowData) => {
-    if (rowData.gender === "f") return "Femenino";
-    else if (rowData.gender === "m") return "Masculino";
+    if (rowData.gender.toUpperCase() === "F") return "Femenino";
+    else if (rowData.gender.toUpperCase() === "M") return "Masculino";
     else return "Indiferente";
   };
 
@@ -90,8 +114,8 @@ export default function ExamsTable() {
       {/*
        *User edit emergent window
        */}
-      {menuContext.emergentEditExamState && (
-        <EditExamExistence id={codevar} name={namevar} />
+      {menuContext.emergentEditExamState && currentInfo && (
+        <EditExamExistence id={codevar} name={namevar} currentInfo={currentInfo} />
       )}
 
       {/*

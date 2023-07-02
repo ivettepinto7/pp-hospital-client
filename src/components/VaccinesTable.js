@@ -20,6 +20,7 @@ export default function VaccinesTable() {
 
   const [codevar, setcodevar] = useState("");
   const [namevar, setnamevar] = useState("");
+  const [doses, setdoses] = useState("");
 
   const dt = useRef(null);
 
@@ -51,6 +52,7 @@ export default function VaccinesTable() {
           onClick={() => {
             setcodevar(rowData.id_vaccine);
             setnamevar(rowData.name);
+            setdoses(rowData.required_doses);
             menuContext.settingEmergentEditVaccineState();
           }}
         />
@@ -86,7 +88,7 @@ export default function VaccinesTable() {
        *User edit emergent window
        */}
       {menuContext.emergentEditVaccineState && (
-        <EditVaccineExistence code={codevar} name={namevar} />
+        <EditVaccineExistence code={codevar} name={namevar} doses={doses} />
       )}
 
       {/*

@@ -14,7 +14,7 @@ import { classNames } from "primereact/utils";
 
 import "../cssFiles/FormDemo.css";
 
-export default function EditAreaExistence({ code, name }) {
+export default function EditAreaExistence({ code, name, currentInfo }) {
   const { emergentEditAreaState } = useContext(MenuContext);
   const menuContext = useContext(MenuContext);
   const { token } = useContext(UserContext);
@@ -54,7 +54,7 @@ export default function EditAreaExistence({ code, name }) {
       data = {
         id: code,
         name: data.name,
-        id_shift: data.id_shift
+        id_shift: data.id_shift,
       };
       axios
         .put(process.env.REACT_APP_API_URL + "admin/areas/update", data, {
@@ -130,7 +130,7 @@ export default function EditAreaExistence({ code, name }) {
           className="p-button-text"
         />
         <Button
-          label="Crear"
+          label="Guardar"
           type="submit"
           onClick={handleSubmit(onSubmit)}
           icon="pi pi-check"
@@ -181,6 +181,7 @@ export default function EditAreaExistence({ code, name }) {
                 <div className="field">
                   <span className="p-float-label">
                     <Controller
+                      defaultValue={currentInfo.name}
                       name="name"
                       control={control}
                       render={({ field, fieldState }) => (
@@ -199,6 +200,7 @@ export default function EditAreaExistence({ code, name }) {
                 <div className="field">
                   <span className="p-float-label">
                     <Controller
+                      defaultValue={currentInfo.id_shift.id_shift}
                       name="id_shift"
                       control={control}
                       render={({ field }) => (
@@ -219,7 +221,7 @@ export default function EditAreaExistence({ code, name }) {
                       Turno*
                     </label>
                   </span>
-                  {getFormErrorMessage("gender")}
+                  {getFormErrorMessage("shift")}
                 </div>
               </form>
             </div>

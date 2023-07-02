@@ -15,7 +15,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import "../cssFiles/FormDemo.css";
 
 
-export default function EditVaccineExistence({code,name}) {
+export default function EditVaccineExistence({code,name,doses}) {
     const { emergentEditVaccineState } = useContext(MenuContext);
     const menuContext = useContext(MenuContext);
     const { token } = useContext(UserContext);
@@ -88,7 +88,7 @@ export default function EditVaccineExistence({code,name}) {
                     className="p-button-text"
                 />
                 <Button
-                    label="Crear"
+                    label="Guardar"
                     type='submit'
                     onClick={handleSubmit(onSubmit)}
                     icon="pi pi-check" />
@@ -125,7 +125,7 @@ export default function EditVaccineExistence({code,name}) {
 
                                 <div className="field">
                                     <span className="p-float-label">
-                                        <Controller name="name" control={control}  render={({ field, fieldState }) => (
+                                        <Controller defaultValue={name} name="name" control={control}  render={({ field, fieldState }) => (
                                             <InputText id={field.name} {...field} autoFocus className={classNames({ 'p-invalid': fieldState.invalid })} />
                                         )} />
                                         <label htmlFor="name" className={classNames({ 'p-error': errors.name })}>Nombre</label>
@@ -136,7 +136,7 @@ export default function EditVaccineExistence({code,name}) {
 
                                 <div className="field">
                                     <span className="p-float-label">
-                                        <Controller name="required_doses" control={control} render={({ field, fieldState }) => (
+                                        <Controller defaultValue={doses} name="required_doses" control={control} render={({ field, fieldState }) => (
                                             <InputNumber id={field.name} {...field} mode="decimal" onChange={(e) => field.onChange(e.value)} />
                                         )} />
                                         <label htmlFor="required_doses" >Dosis requeridas</label>

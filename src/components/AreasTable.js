@@ -20,12 +20,36 @@ export default function AreasTable() {
 
   const [codevar, setcodevar] = useState("");
   const [namevar, setnamevar] = useState("");
+  const [currentInfo, setCurrentInfo] = useState([]);
 
   const dt = useRef(null);
 
   useEffect(() => {
     menuContext.getAllAreas(token);
   }, []);
+
+  const getCurrentInfo = (rowData) => {
+    try {
+      axios
+        .get(
+          process.env.REACT_APP_API_URL + `admin/areas/${rowData.id_area}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            setCurrentInfo(res.data);
+            setcodevar(rowData.id_area);
+            setnamevar(rowData.name);
+            menuContext.settingEmergentEditAreaState();
+          }
+        })
+        .catch((err) => console.error(err));
+    } catch (error) {
+      throw console.error(error);
+    }
+  };
 
   const leftToolbarTemplate = () => {
     return (
@@ -47,9 +71,7 @@ export default function AreasTable() {
           icon="pi pi-pencil"
           className="p-button-rounded p-button-success mr-2"
           onClick={() => {
-            setcodevar(rowData.id_area);
-            setnamevar(rowData.name);
-            menuContext.settingEmergentEditAreaState();
+            getCurrentInfo(rowData);
           }}
         />
         <Button
@@ -85,8 +107,12 @@ export default function AreasTable() {
       {/*
        *User edit emergent window
        */}
-      {menuContext.emergentEditAreaState && (
-        <EditAreaExistence code={codevar} name={namevar} />
+      {menuContext.emergentEditAreaState && currentInfo && (
+        <EditAreaExistence
+          code={codevar}
+          name={namevar}
+          currentInfo={currentInfo}
+        />
       )}
 
       {/*
