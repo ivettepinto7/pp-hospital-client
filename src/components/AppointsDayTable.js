@@ -7,11 +7,13 @@ import { UserContext } from "../contexts/UserContext/UserContext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import "./cssFiles/DataTable.css";
+import { InputText } from "primereact/inputtext";
+import { FilterMatchMode } from "primereact/api";
 
 //Helpers imports
 import { useNavigate } from "react-router-dom";
 import UserRecordTable from "./EmergentWindows/UserRecordTable";
+import "./cssFiles/DataTable.css";
 
 export default function AppointsDayTable() {
   const menuContext = useContext(MenuContext);
@@ -25,6 +27,14 @@ export default function AppointsDayTable() {
     settingUserCode,
   } = useContext(UserContext);
   const navigate = useNavigate();
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    "id_patient.username": {
+      value: null,
+      matchMode: FilterMatchMode.CONTAINS,
+    },
+  });
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
 
   const dt = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -62,6 +72,16 @@ export default function AppointsDayTable() {
       throw console.error(error);
     }
   }, []);
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+
+    _filters["global"].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
 
   const actionBodyTemplate = (rowData) => {
     if (role === 4) {
@@ -128,13 +148,21 @@ export default function AppointsDayTable() {
   };
 
   const header = (
-    <div className="table-header">
-      <h5 className="mx-0 my-1">Manejo de citas</h5>
+    <div className="table-header flex justify-between">
+      <h5 className="mx-0 my-1">Manejo de citas del día</h5>
+      <span className="p-input-icon-left">
+        <i className="pi pi-search" />
+        <InputText
+          value={globalFilterValue}
+          onChange={onGlobalFilterChange}
+          placeholder="Buscar por nombre de usuario"
+        />
+      </span>
     </div>
   );
 
   const nameBodyTemplate = (rowData) => {
-    return rowData.id_patient.name + " " + rowData.id_patient.last_name;
+    return `${rowData.id_patient.name} ${rowData.id_patient.last_name} @${rowData.id_patient.username}`;
   };
 
   function getAge(dateString) {
@@ -163,9 +191,18 @@ export default function AppointsDayTable() {
     else return <span className="text-green-800">Atendido</span>;
   };
 
+  const paginatorLeft = (
+    <Button type="button" icon="pi pi-refresh" className="p-button-text" />
+  );
+  const paginatorRight = (
+    <Button type="button" icon="pi pi-cloud" className="p-button-text" />
+  );
+
   return (
     <div className="w-full overflow-hidden">
-      <UserRecordTable loading={loading2} userRecordsList={userRecordsList} />
+      {menuContext.emergentShowRecordState && (
+        <UserRecordTable loading={loading2} userRecordsList={userRecordsList} />
+      )}
       <div className="card">
         <DataTable
           showGridlines
@@ -173,6 +210,8 @@ export default function AppointsDayTable() {
           value={dayAppointments}
           dataKey="id_appointment"
           paginator
+          paginatorLeft={paginatorLeft}
+          paginatorRight={paginatorRight}
           rows={10}
           rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
@@ -180,6 +219,12 @@ export default function AppointsDayTable() {
           loading={loading}
           header={header}
           responsiveLayout="scroll"
+          filters={filters}
+          filterDisplay="row"
+          globalFilterFields={[
+            "id_patient.username",
+          ]}
+          emptyMessage="Sin citas."
         >
           <Column
             field="id_patient.name"
