@@ -7,6 +7,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from 'primereact/column';
 import './cssFiles/DataTable.css';
 
+
 export default function TestsTable() {
   const { token } = useContext(UserContext);
 
@@ -26,8 +27,9 @@ export default function TestsTable() {
     } catch (error) {
       throw console.error(error);
     }
-  }, [])
-  
+  })
+
+
   const header = (
     <div className="table-header">
       <h5 className="mx-0 my-1">Examenes realizados</h5>
@@ -49,3 +51,4 @@ export default function TestsTable() {
     </div>
   )
 }
+
