@@ -8,11 +8,13 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toolbar } from "primereact/toolbar";
 import { Button } from "primereact/button";
-import "./cssFiles/DataTable.css";
+import { FilterMatchMode, FilterOperator } from "primereact/api";
 
 import CreateNewDrug from "./EmergentWindows/CreateNewDrug";
 import EditDrugExistence from "./EmergentWindows/EditDrugExistence";
 import DeleteOneDrugExistence from "./EmergentWindows/DeleteDrugExistence";
+import { InputText } from "primereact/inputtext";
+import "./cssFiles/DataTable.css";
 
 export default function DrugsTable() {
   const menuContext = useContext(MenuContext);
@@ -20,6 +22,11 @@ export default function DrugsTable() {
   const [codevar, setcodevar] = useState("");
   const [namevar, setnamevar] = useState("");
   const [currentInfo, setCurrentInfo] = useState({});
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  });
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
 
   useEffect(() => {
     menuContext.getAllDrugs(token);
@@ -48,15 +55,34 @@ export default function DrugsTable() {
 
   const leftToolbarTemplate = () => {
     return (
-      <>
+      <div className="w-full flex justify-around">
         <Button
           label="Nuevo"
           icon="pi pi-plus"
           className="p-button-success mr-2"
           onClick={() => menuContext.settingEmergentNewDrugState()}
         />
-      </>
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Buscar"
+          />
+        </span>
+        F
+      </div>
     );
+  };
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+
+    _filters["global"].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -89,6 +115,13 @@ export default function DrugsTable() {
     </div>
   );
 
+  const paginatorLeft = (
+    <Button type="button" icon="pi pi-refresh" className="p-button-text" />
+  );
+  const paginatorRight = (
+    <Button type="button" icon="pi pi-cloud" className="p-button-text" />
+  );
+
   return (
     <div className="w-full overflow-hidden">
       {/*
@@ -119,19 +152,24 @@ export default function DrugsTable() {
 
         <DataTable
           showGridlines
-          lazy={true}
           ref={dt}
           value={menuContext.drugsList}
-          dataKey="id"
-          paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 25]}
-          totalRecords={menuContext.drugsList.length}
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} medicamentos"
           loading={menuContext.loading}
+          dataKey="id_drug"
           header={header}
           responsiveLayout="scroll"
+          totalRecords={menuContext.drugsList.length}
+          paginator
+          paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+          currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} medicamentos"
+          rows={10}
+          rowsPerPageOptions={[10, 20, 50]}
+          paginatorLeft={paginatorLeft}
+          paginatorRight={paginatorRight}
+          filters={filters}
+          filterDisplay="row"
+          globalFilterFields={["name"]}
+          emptyMessage="Medicamento no encontrada."
         >
           <Column
             field="name"
