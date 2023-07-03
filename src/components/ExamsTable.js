@@ -7,13 +7,15 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toolbar } from "primereact/toolbar";
 import { Button } from "primereact/button";
-import "./cssFiles/DataTable.css";
+import { FilterMatchMode } from "primereact/api";
 
 import EditExamExistence from "./EmergentWindows/EditExamExistence";
 import DeleteOneExam from "./EmergentWindows/DeleteExamExistence";
 
 import CreateNewExam from "./EmergentWindows/CreateNewExam";
 import axios from "axios";
+import "./cssFiles/DataTable.css";
+import { InputText } from "primereact/inputtext";
 
 export default function ExamsTable() {
   const menuContext = useContext(MenuContext);
@@ -21,7 +23,11 @@ export default function ExamsTable() {
   const [codevar, setcodevar] = useState("");
   const [namevar, setnamevar] = useState("");
   const [currentInfo, setCurrentInfo] = useState({});
-
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  });
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
   const dt = useRef(null);
 
   useEffect(() => {
@@ -31,12 +37,9 @@ export default function ExamsTable() {
   const getCurrentInfo = (rowData) => {
     try {
       axios
-        .get(
-          process.env.REACT_APP_API_URL + `admin/tests/${rowData.id_test}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        )
+        .get(process.env.REACT_APP_API_URL + `admin/tests/${rowData.id_test}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then((res) => {
           if (res.status === 200) {
             console.log("data actual ", res.data);
@@ -52,16 +55,34 @@ export default function ExamsTable() {
     }
   };
 
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+
+    _filters["global"].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
+
   const leftToolbarTemplate = () => {
     return (
-      <>
+      <div className="w-full flex justify-around">
         <Button
           label="Nuevo"
           icon="pi pi-plus"
           className="p-button-success mr-2"
           onClick={() => menuContext.settingEmergentNewExamState()}
         />
-      </>
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Buscar"
+          />
+        </span>
+      </div>
     );
   };
 
@@ -104,6 +125,13 @@ export default function ExamsTable() {
     else return "Indiferente";
   };
 
+  const paginatorLeft = (
+    <Button type="button" icon="pi pi-refresh" className="p-button-text" />
+  );
+  const paginatorRight = (
+    <Button type="button" icon="pi pi-cloud" className="p-button-text" />
+  );
+
   return (
     <div className="w-full overflow-hidden">
       {/*
@@ -115,7 +143,11 @@ export default function ExamsTable() {
        *User edit emergent window
        */}
       {menuContext.emergentEditExamState && currentInfo && (
-        <EditExamExistence id={codevar} name={namevar} currentInfo={currentInfo} />
+        <EditExamExistence
+          id={codevar}
+          name={namevar}
+          currentInfo={currentInfo}
+        />
       )}
 
       {/*
@@ -129,18 +161,25 @@ export default function ExamsTable() {
         <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
 
         <DataTable
-          loading={menuContext.loading}
           showGridlines
           ref={dt}
           value={menuContext.testsList}
-          dataKey="id"
-          paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 25]}
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} exámenes"
+          loading={menuContext.loading}
+          dataKey="id_test"
           header={header}
           responsiveLayout="scroll"
+          totalRecords={menuContext.testsList.length}
+          paginator
+          paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+          currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} exámenes"
+          rows={10}
+          rowsPerPageOptions={[10, 20, 50]}
+          paginatorLeft={paginatorLeft}
+          paginatorRight={paginatorRight}
+          filters={filters}
+          filterDisplay="row"
+          globalFilterFields={["name"]}
+          emptyMessage="Examen no encontrado."
         >
           <Column
             field="name"
