@@ -8,11 +8,13 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toolbar } from "primereact/toolbar";
 import { Button } from "primereact/button";
+import { FilterMatchMode } from "primereact/api";
 import "./cssFiles/DataTable.css";
 
 import CreateNewUser from "./EmergentWindows/CreateNewUser";
 import EditUser from "./EmergentWindows/EditUser";
 import DeleteOneUser from "./EmergentWindows/DeleteOneUser";
+import { InputText } from "primereact/inputtext";
 
 export default function UsersTable() {
   const menuContext = useContext(MenuContext);
@@ -22,6 +24,11 @@ export default function UsersTable() {
   const [id, setId] = useState(null);
   const [username, setUsername] = useState("");
   const [currentInfo, setCurrentInfo] = useState({});
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    username: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  });
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
 
   useEffect(() => {
     menuContext.getAllUsers(token);
@@ -30,9 +37,12 @@ export default function UsersTable() {
   const getCurrentUserInfo = (rowData) => {
     try {
       axios
-        .get(process.env.REACT_APP_API_URL + `admin/users/${rowData.id_person}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        .get(
+          process.env.REACT_APP_API_URL + `admin/users/${rowData.id_person}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
         .then((res) => {
           if (res.status === 200) {
             setCurrentInfo(res.data);
@@ -47,16 +57,34 @@ export default function UsersTable() {
     }
   };
 
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+
+    _filters["global"].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
+
   const leftToolbarTemplate = () => {
     return (
-      <>
+      <div className="w-full flex justify-around">
         <Button
           label="Nuevo"
           icon="pi pi-plus"
           className="p-button-success mr-2"
           onClick={() => menuContext.settingEmergentNewUserState()}
         />
-      </>
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Buscar"
+          />
+        </span>
+      </div>
     );
   };
 
@@ -158,6 +186,12 @@ export default function UsersTable() {
           rowsPerPageOptions={[10, 20, 50]}
           paginatorLeft={paginatorLeft}
           paginatorRight={paginatorRight}
+          filters={filters}
+          filterDisplay="row"
+          globalFilterFields={[
+            "username",
+          ]}
+          emptyMessage="Usuario no encontrado."
         >
           <Column
             field="name"
