@@ -7,6 +7,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from 'primereact/column';
 import './cssFiles/DataTable.css';
 
+
 export default function InmunizationsTable() {
   const { token } = useContext(UserContext);
 
@@ -26,7 +27,7 @@ export default function InmunizationsTable() {
     } catch (error) {
       throw console.error(error);
     }
-  }, [])
+  })
 
   const header = (
     <div className="table-header">
