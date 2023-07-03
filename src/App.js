@@ -16,7 +16,7 @@ const Landing = lazy(() => import("./pages/Landing"));
 const Users = lazy(() => import("./pages/Users"));
 const Tests = lazy(() => import("./pages/Tests"));
 const Inmunizations = lazy(() => import("./pages/Inmunizations"));
-const PrevAppointments = lazy(() => import("./pages/PrevAppoin"));
+const PrevAppointments = lazy(() => import("./pages/PrevAppointments"));
 const Exams = lazy(() => import("./pages/Exams"));
 const Vaccines = lazy(() => import("./pages/Vaccines"));
 const AppointsDay = lazy(() => import("./pages/AppointsDay"));
