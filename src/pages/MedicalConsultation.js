@@ -15,6 +15,7 @@ import {
   faPenToSquare,
   faPlusCircle,
   faTrashAlt,
+  faUpload,
 } from "@fortawesome/free-solid-svg-icons";
 
 import "../components/cssFiles/FormDemo.css";
@@ -48,6 +49,8 @@ export default function MedicalConsultation() {
   const [drugsList, setDrugsList] = useState([]);
   const [userRecordsList, setUserRecordsList] = useState([]);
   const [showMessage, setShowMessage] = useState(false);
+  const [status, setStatus] = useState("");
+
   useEffect(() => {
     //obtener lista
     try {
@@ -65,7 +68,11 @@ export default function MedicalConsultation() {
       throw console.error(error);
     }
   }, [role, token]);
+
   const CustomInput = (props) => <input type="number" {...props} />;
+  const CustomInputText = (props) => (
+    <textarea type="text" {...props} rows="3" cols="33" />
+  );
 
   const getUserRecords = (id) => {
     try {
@@ -82,6 +89,26 @@ export default function MedicalConsultation() {
           }
         })
         .catch((err) => console.error(err));
+    } catch (error) {
+      throw console.error(error);
+    }
+  };
+
+  const handleFinishConsultation = () => {
+    try {
+      axios
+        .put(
+          process.env.REACT_APP_API_URL +
+            `doctor/citas-dia/consulta/finalizar/${parseInt(appointmentId)}`,
+          { description },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            setShowMessage(true);
+          }
+        })
+        .catch((err) => console.log(err));
     } catch (error) {
       throw console.error(error);
     }
@@ -103,7 +130,9 @@ export default function MedicalConsultation() {
   };
   return (
     <div className="h-screen max-h-screen bg-black w-full mt-4">
-      <UserRecordTable loading={loading2} userRecordsList={userRecordsList} />
+      {menuContext.emergentShowRecordState && (
+        <UserRecordTable loading={loading2} userRecordsList={userRecordsList} />
+      )}
       <Dialog
         visible={showMessage}
         onHide={() => setShowMessage(false)}
@@ -119,7 +148,7 @@ export default function MedicalConsultation() {
             style={{ fontSize: "5rem", color: "var(--green-500)" }}
           ></i>
           <p className="ml-4">
-            Prescripción médica agregada con éxito para <b>{fullName}</b>.
+            Cita finalizada con éxito para <b>{fullName}</b>.
           </p>
         </div>
       </Dialog>
@@ -148,196 +177,201 @@ export default function MedicalConsultation() {
               medicine: -1,
               doses: "",
               quantity: "",
+              indication: "",
             },
           ],
         }}
         validationSchema={DrugsSchema}
         onSubmit={(values) => {
           try {
-            let data = {
-              id_appointment: appointmentId,
-              medicines: values.list,
-              indication: description,
-            };
-            axios
-              .post(
-                process.env.REACT_APP_API_URL +
-                  `doctor/citas-dia/consulta/receta/crear`,
-                data,
-                { headers: { Authorization: `Bearer ${token}` } }
-              )
-              .then((res) => {
-                if (res.status === 201) {
-                  axios
-                    .put(
-                      process.env.REACT_APP_API_URL +
-                        `doctor/citas-dia/consulta/finalizar/${parseInt(
-                          appointmentId
-                        )}`,
-                      null,
-                      { headers: { Authorization: `Bearer ${token}` } }
-                    )
-                    .then((res) => {
-                      if (res.status === 200) {
-                        setShowMessage(true);
-                      }
-                    })
-                    .catch((err) => console.error(err));
-                }
-              })
-              .catch((err) => console.error(err));
+            for (let index = 0; index < values.list.length; index++) {
+              const element = values.list[index];
+              const data = { id_appointment: appointmentId, ...element };
+              axios
+                .post(
+                  process.env.REACT_APP_API_URL +
+                    "doctor/citas-dia/consulta/receta/crear",
+                  data,
+                  { headers: { Authorization: `Bearer ${token}` } }
+                )
+                .then((res) => {
+                  if (res.status === 201) {
+                    setStatus("Receta creada exitosamente.");
+                  }
+                })
+                .catch((err) => console.log(err));
+            }
           } catch (error) {
             throw console.error(error);
           }
         }}
         children={({ values, errors, touched }) => (
-          <Form>
-            <FieldArray
-              name="list"
-              render={(arrayHelpers) => (
-                <>
-                  <div className="lg:grid lg:grid-cols-2 md:grid md:grid-cols-2 m-6">
-                    <div className="mx-2 text-center border-2 rounded-lg py-4 my-2 max-h-100">
-                      <div className="flex justify-center items-center">
-                        <FontAwesomeIcon
-                          className="text-blue-800 text-4xl mx-4"
-                          icon={faCapsules}
-                        />
-                        <h2 className="lg:text-2xl md:text-xl sm:text-xs xsm:text-xs">
-                          <b>Agregar medicamento</b>
-                        </h2>
-                      </div>
-                      <div>
-                        {values.list && values.list.length > 0 ? (
-                          values.list.map((item, index) => (
-                            <div
-                              className="flex justify-center items-center"
-                              key={index}
+          <>
+            <div className="lg:grid lg:grid-cols-2 md:grid md:grid-cols-2 m-6">
+              <>
+                <Form>
+                  <FieldArray
+                    name="list"
+                    render={(arrayHelpers) => (
+                      <div className="mx-2 text-center border-2 rounded-lg py-4 my-2 max-h-100">
+                        <div className="flex justify-center items-center">
+                          <FontAwesomeIcon
+                            className="text-blue-800 text-4xl mx-4"
+                            icon={faCapsules}
+                          />
+                          <h2 className="lg:text-2xl md:text-xl sm:text-xs xsm:text-xs">
+                            <b>Agregar medicamento</b>
+                          </h2>
+                        </div>
+                        <div>
+                          {status !== "" && <h3>{status}</h3>}
+                          {values.list && values.list.length > 0 ? (
+                            values.list.map((item, index) => (
+                              <div
+                                className="flex justify-center items-center"
+                                key={index}
+                              >
+                                <Field
+                                  placeholder="Seleccionar medicina"
+                                  className="bg-gray-700 text-white text-sm w-1/4 mx-2"
+                                  as="select"
+                                  name={`list.${index}.medicine`}
+                                  key={`list.${index}.medicine`}
+                                >
+                                  <option value={-1} disabled={true}>
+                                    Seleccionar medicamento
+                                  </option>
+                                  {drugsList &&
+                                    drugsList.map((drug, index) => (
+                                      <option
+                                        key={parseInt(drug.id_drug)}
+                                        value={parseInt(drug.id_drug)}
+                                        defaultValue={undefined}
+                                      >
+                                        {drug.name.toString()}
+                                      </option>
+                                    ))}
+                                </Field>
+                                <ErrorMessage
+                                  className="text-xs bg-red-600"
+                                  name={`list.${index}.medicine`}
+                                />
+                                <Field
+                                  as={CustomInput}
+                                  placeholder="Dosis"
+                                  min={1}
+                                  className="bg-gray-700 text-white text-sm w-1/5 mx-2"
+                                  name={`list.${index}.doses`}
+                                  key={`list.${index}.doses`}
+                                />
+                                <ErrorMessage
+                                  className="text-xs bg-red-600"
+                                  name={`list.${index}.doses`}
+                                />
+                                <Field
+                                  as={CustomInput}
+                                  placeholder="Cantidad"
+                                  min={1}
+                                  className="bg-gray-700 text-white text-sm w-1/5 mx-2"
+                                  name={`list.${index}.quantity`}
+                                  key={`list.${index}.quantity`}
+                                />
+                                <ErrorMessage name={`list.${index}.quantity`} />
+                                <Field
+                                  as={CustomInputText}
+                                  placeholder="Indicación"
+                                  min={1}
+                                  className="bg-gray-700 text-white text-sm w-1/5 mx-2"
+                                  name={`list.${index}.indication`}
+                                  key={`list.${index}.indication`}
+                                />
+                                <button
+                                  className="mx-2"
+                                  type="button"
+                                  onClick={() => {
+                                    if (values.list.length < 4) {
+                                      arrayHelpers.insert(index, "");
+                                    }
+                                  }}
+                                >
+                                  <FontAwesomeIcon
+                                    className="text-blue-800 text-xl"
+                                    icon={faPlusCircle}
+                                  />
+                                </button>
+                                <button
+                                  className="mx-2"
+                                  type="button"
+                                  onClick={() => arrayHelpers.remove(index)}
+                                >
+                                  <FontAwesomeIcon
+                                    className="text-red-600 text-xl"
+                                    icon={faTrashAlt}
+                                  />
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            <button
+                              className="text-sm underline"
+                              type="button"
+                              onClick={() => arrayHelpers.push("")}
                             >
-                              <Field
-                                placeholder="Seleccionar medicina"
-                                className="bg-gray-700 text-white text-sm w-1/4 mx-2"
-                                as="select"
-                                name={`list.${index}.medicine`}
-                                key={`list.${index}.medicine`}
-                              >
-                                <option value={-1} disabled={true}>
-                                  Seleccionar medicamento
-                                </option>
-                                {drugsList &&
-                                  drugsList.map((drug, index) => (
-                                    <option
-                                      key={parseInt(drug.id_drug)}
-                                      value={parseInt(drug.id_drug)}
-                                      defaultValue={undefined}
-                                    >
-                                      {drug.name.toString()}
-                                    </option>
-                                  ))}
-                              </Field>
-                              <ErrorMessage
-                                className="text-xs bg-red-600"
-                                name={`list.${index}.medicine`}
-                              />
-                              <Field
-                                as={CustomInput}
-                                placeholder="Dosis"
-                                min={1}
-                                className="bg-gray-700 text-white text-sm w-1/5 mx-2"
-                                name={`list.${index}.doses`}
-                                key={`list.${index}.doses`}
-                              />
-                              <ErrorMessage
-                                className="text-xs bg-red-600"
-                                name={`list.${index}.doses`}
-                              />
-                              <Field
-                                as={CustomInput}
-                                placeholder="Cantidad"
-                                min={1}
-                                className="bg-gray-700 text-white text-sm w-1/5 mx-2"
-                                name={`list.${index}.quantity`}
-                                key={`list.${index}.quantity`}
-                              />
-                              <ErrorMessage name={`list.${index}.quantity`} />
-                              <button
-                                className="mx-2"
-                                type="button"
-                                onClick={() => {
-                                  if (values.list.length < 9) {
-                                    arrayHelpers.insert(index, "");
-                                  }
-                                }}
-                              >
-                                <FontAwesomeIcon
-                                  className="text-blue-800 text-xl"
-                                  icon={faPlusCircle}
-                                />
-                              </button>
-                              <button
-                                className="mx-2"
-                                type="button"
-                                onClick={() => arrayHelpers.remove(index)}
-                              >
-                                <FontAwesomeIcon
-                                  className="text-red-600 text-xl"
-                                  icon={faTrashAlt}
-                                />
-                              </button>
-                            </div>
-                          ))
-                        ) : (
-                          <button
-                            className="text-sm underline"
-                            type="button"
-                            onClick={() => arrayHelpers.push("")}
-                          >
-                            Agregar
-                          </button>
-                        )}
+                              Agregar
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="mx-2 text-center border-2 rounded-lg py-4 my-2">
-                      <div className="flex justify-center items-center">
-                        <FontAwesomeIcon
-                          className="text-yellow-500 text-4xl mx-4"
-                          icon={faPenToSquare}
-                        />
-                        <h2 className="lg:text-2xl md:text-xl sm:text-xs xsm:text-xs">
-                          <b>Nota adicional de la consulta</b>
-                        </h2>
-                      </div>
-                      <InputTextarea
-                        placeholder="Ej: Regresar a consulta al terminar tratamiento."
-                        className="mt-4"
-                        onChange={(e) => setDescription(e.target.value)}
-                        rows={5}
-                        cols={50}
-                      />
-                    </div>
-                  </div>
-                  <div className="lg:flex md:flex lg:justify-around md:justify-around sm:justify-center xsm:justify-center m-6">
-                    <button
-                      type="button"
-                      className="flex justify-center items-center text-white text-xl p-2 rounded-lg tracking-wide font-bold focus:outline-none focus:shadow-outline hover:bg-yellow-600 shadow-lg bg-yellow-700 cursor-pointer transition ease-in duration-300"
-                      onClick={() => {
-                        getUserRecords(userCode.id_person);
-                        menuContext.settingEmergentShowRecordState();
-                      }}
-                    >
-                      Abrir expediente
-                    </button>
-                    <button
-                      className="flex justify-center items-center text-white text-xl p-2 rounded-lg tracking-wide font-bold focus:outline-none focus:shadow-outline hover:bg-indigo-600 shadow-lg bg-blue-800 cursor-pointer transition ease-in duration-300"
-                      type="submit"
-                    >
-                      Finalizar cita
-                    </button>
-                  </div>
-                </>
-              )}
-            />
-          </Form>
+                    )}
+                  />
+                  <button className="flex justify-center w-full" type="submit">
+                    <FontAwesomeIcon
+                      className="text-blue-800 text-xl"
+                      icon={faUpload}
+                    />
+                    Crear receta
+                  </button>
+                </Form>
+              </>
+              <div className="mx-2 text-center border-2 rounded-lg py-4 my-2">
+                <div className="flex justify-center items-center">
+                  <FontAwesomeIcon
+                    className="text-yellow-500 text-4xl mx-4"
+                    icon={faPenToSquare}
+                  />
+                  <h2 className="lg:text-2xl md:text-xl sm:text-xs xsm:text-xs">
+                    <b>Nota adicional de la consulta</b>
+                  </h2>
+                </div>
+                <InputTextarea
+                  placeholder="Ej: Regresar a consulta al terminar tratamiento."
+                  className="mt-4"
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={5}
+                  cols={50}
+                />
+              </div>
+            </div>
+            <div className="lg:flex md:flex lg:justify-around md:justify-around sm:justify-center xsm:justify-center m-6">
+              <button
+                type="button"
+                className="flex justify-center items-center text-white text-xl p-2 rounded-lg tracking-wide font-bold focus:outline-none focus:shadow-outline hover:bg-yellow-600 shadow-lg bg-yellow-700 cursor-pointer transition ease-in duration-300"
+                onClick={() => {
+                  getUserRecords(userCode.id_person);
+                  menuContext.settingEmergentShowRecordState();
+                }}
+              >
+                Abrir expediente
+              </button>
+              <button
+                className="flex justify-center items-center text-white text-xl p-2 rounded-lg tracking-wide font-bold focus:outline-none focus:shadow-outline hover:bg-indigo-600 shadow-lg bg-blue-800 cursor-pointer transition ease-in duration-300"
+                type="button"
+                onClick={() => handleFinishConsultation()}
+              >
+                Finalizar cita
+              </button>
+            </div>
+          </>
         )}
       />
     </div>
