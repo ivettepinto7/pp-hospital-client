@@ -86,6 +86,7 @@ export default function AppointsDayTable() {
           <Button
             icon="pi pi-book"
             tooltip="Atender"
+            disabled={rowData.status === true ? true : false}
             tooltipOptions={{ position: "bottom" }}
             className="p-button-rounded p-button-success mr-2"
             onClick={() => {
