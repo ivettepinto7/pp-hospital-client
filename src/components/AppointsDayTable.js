@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from "axios";
 import MenuContext from "../contexts/MenuContext/MenuContext";
-import { UserContext } from "../contexts/UserContext/UserContext";
+import {
+  SetUserContext,
+  UserContext,
+} from "../contexts/UserContext/UserContext";
 
 //Components imports
 import { DataTable } from "primereact/datatable";
@@ -17,15 +20,8 @@ import "./cssFiles/DataTable.css";
 
 export default function AppointsDayTable() {
   const menuContext = useContext(MenuContext);
-  const {
-    role,
-    token,
-    settingFullname,
-    settingAge,
-    settingGender,
-    settingIdAppointment,
-    settingUserCode,
-  } = useContext(UserContext);
+  const { role, token } = useContext(UserContext);
+  const { setConsultationInfo } = useContext(SetUserContext);
   const navigate = useNavigate();
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -93,14 +89,14 @@ export default function AppointsDayTable() {
             tooltipOptions={{ position: "bottom" }}
             className="p-button-rounded p-button-success mr-2"
             onClick={() => {
-              settingUserCode(rowData.id_patient.id_person);
-              settingIdAppointment(rowData.id_appointment);
-              settingFullname(
-                rowData.id_patient.name,
-                rowData.id_patient.last_name
-              );
-              settingAge(getAge(rowData.id_patient.birthdate));
-              settingGender(rowData.id_patient.gender);
+              setConsultationInfo({
+                userCode: rowData.id_patient,
+                appointmentId: rowData.id_appointment,
+                fullName:
+                  rowData.id_patient.name + " " + rowData.id_patient.last_name,
+                age: getAge(rowData.id_patient.birthdate),
+                gender: rowData.id_patient.gender,
+              });
               getUserRecords(rowData.id_patient.id_person);
               navigate("/landing/citas-dia/consulta");
             }}
@@ -221,9 +217,7 @@ export default function AppointsDayTable() {
           responsiveLayout="scroll"
           filters={filters}
           filterDisplay="row"
-          globalFilterFields={[
-            "id_patient.username",
-          ]}
+          globalFilterFields={["id_patient.username"]}
           emptyMessage="Sin citas."
         >
           <Column

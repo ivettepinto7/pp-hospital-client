@@ -279,6 +279,14 @@ const MenuState = (props) => {
     }
   }
 
+  const [consultationInfo, setConsultationInfo] = useState({
+    userCode: null,
+    appointmentId: null,
+    fullName: "",
+    age: null,
+    gender: "",
+  });
+
   const values = {
     emergentNewUserState,
     emergentEditUserState,
@@ -304,6 +312,7 @@ const MenuState = (props) => {
     vaccinesList,
     areasList,
     drugsList,
+    consultationInfo,
 
     settingEmergentNewUserState,
     settingEmergentEditUserState,
@@ -327,7 +336,8 @@ const MenuState = (props) => {
     getAllTests,
     getAllVaccines,
     getAllAreas,
-    getAllDrugs
+    getAllDrugs,
+    setConsultationInfo,
   };
 
   return (
