@@ -179,7 +179,7 @@ export default function ExamsTable() {
           filters={filters}
           filterDisplay="row"
           globalFilterFields={["name"]}
-          emptyMessage="Examen no encontrado."
+          emptyMessage="Sin examenes."
         >
           <Column
             field="name"
